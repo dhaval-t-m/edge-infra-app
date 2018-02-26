@@ -1,0 +1,185 @@
+-- -----------------------------------------------------
+-- Table `aec`.`pdu_instance`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aec`.`pdu_instance` (
+  `rack_instance_id` INT NOT NULL,
+  `pdu_profile_id` INT NOT NULL,
+  `pdu_location` VARCHAR(20) NOT NULL,
+  `model` VARCHAR(20) NOT NULL COMMENT 'Model joins with the Hardware_Profile table.',
+  `style` VARCHAR(20) NULL COMMENT 'might be an enum() if there are known values',
+  PRIMARY KEY (`rack_instance_id`, `pdu_location`),
+  INDEX `fk_PDU_Profile_idx` (`pdu_profile_id` ASC),
+  UNIQUE INDEX `rack_instance_id_UNIQUE` (`rack_instance_id` ASC),
+  CONSTRAINT `fk_pdu_profile`
+    FOREIGN KEY (`pdu_profile_id`)
+    REFERENCES `aec`.`pdu_profile` (`pdu_profile_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_rack_name`
+    FOREIGN KEY (`rack_instance_id`)
+    REFERENCES `aec`.`rack_instance` (`rack_instance_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `aec`.`rack_instance`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aec`.`rack_instance` (
+  `rack_instance_id` INT NOT NULL,
+  `rack_profile_id` INT NOT NULL,
+  `region_id` INT NOT NULL,
+  `rack_instance_name` VARCHAR(20) NOT NULL,
+  `zone_id` VARCHAR(8) NOT NULL,
+  `fic` VARCHAR(8) NOT NULL,
+  `model` VARCHAR(20) NOT NULL COMMENT 'Model joins with the Hardware_Info table.',
+  `ckt_diversity` ENUM('Y', 'N') NOT NULL,
+  PRIMARY KEY (`rack_instance_id`, `region_id`))
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `aec`.`zone_instance`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aec`.`zone_instance` (
+  `zone_id` VARCHAR(8) NOT NULL,
+  `zone_name` VARCHAR(8) NULL,
+  `location_id` VARCHAR(8) NOT NULL,
+  `purpose` VARCHAR(30) NULL,
+  `contact_name` VARCHAR(45) NULL,
+  `contact_tel` VARCHAR(45) NULL,
+  `contact_email` VARCHAR(45) NULL,
+  `aec_design_type` VARCHAR(45) NULL,
+  `template_version` VARCHAR(45) NULL,
+  PRIMARY KEY (`zone_id`, `location_id`),
+  UNIQUE INDEX `ZoneID_UNIQUE` (`zone_id` ASC),
+  INDEX `fk_location_id_idx` (`location_id` ASC),
+  CONSTRAINT `fk_location_id`
+    FOREIGN KEY (`location_id`)
+    REFERENCES `aec`.`location_instance` (`location_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `aec`.`location_instance`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aec`.`location_instance` (
+  `location_id` VARCHAR(8) NOT NULL,
+  `location_name` VARCHAR(8) NULL,
+  `loc_alias1` VARCHAR(8) NULL,
+  `loc_alias2` VARCHAR(8) NULL,
+  `type` ENUM('IDC', 'AGN', 'SNRC', 'VHO', 'Other') NOT NULL,
+  `zone_count` TINYINT(2) NOT NULL,
+  `clli` VARCHAR(11) NOT NULL,
+  `region` ENUM('US', 'EMEA', 'CALA', 'AP', 'MOW', 'Other') NOT NULL,
+  `sub_region` ENUM('US-East', 'US-MW', 'US-SE', 'US-SW', 'US-West') NULL,
+  `street_address` VARCHAR(45) NOT NULL,
+  `city` VARCHAR(30) NOT NULL,
+  `state_prov` VARCHAR(20) NOT NULL,
+  `country` CHAR(3) NOT NULL,
+  `zip` VARCHAR(12) NOT NULL,
+  `address` VARCHAR(100) NULL,
+  `contact_name` VARCHAR(45) NULL,
+  `contact_tel` VARCHAR(45) NULL,
+  `contact_email` VARCHAR(45) NULL,
+  PRIMARY KEY (`location_id`))
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `aec`.`rack_profile`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aec`.`rack_profile` (
+  `rack_profile_id` INT NOT NULL,
+  `rack_profile_name` VARCHAR(20) NOT NULL,
+  `height` TINYINT(3) NOT NULL COMMENT 'in inches',
+  `width` TINYINT(3) NOT NULL COMMENT 'in inches',
+  `depth` TINYINT(3) NOT NULL COMMENT 'in inches',
+  `weight` INT NOT NULL COMMENT 'in pounds',
+  `ru_count` TINYINT(3) NOT NULL COMMENT 'numberof RUs',
+  `doors` ENUM('Front', 'Rear', 'Front and Rear') NULL,
+  `side_panels` ENUM('Y', 'N') NULL,
+  `cable_mgr_placement` VARCHAR(20) NULL,
+  `cable_mgr_rus` TINYINT(4) NOT NULL COMMENT 'RUs where the cable manager is',
+  `power_ckt_type` VARCHAR(20) NOT NULL,
+  `power_ckt_count` TINYINT(2) NOT NULL,
+  `volts` TINYINT(4) NOT NULL,
+  `amps` TINYINT(4) NOT NULL,
+  `watts` INT NOT NULL,
+  `btus` INT NOT NULL,
+  `frequency` VARCHAR(8) NOT NULL,
+  `phase` VARCHAR(8) NOT NULL,
+  UNIQUE INDEX `RackProfile_UNIQUE` (`rack_profile_name` ASC),
+  PRIMARY KEY (`rack_profile_id`),
+  UNIQUE INDEX `rack_profile_id_UNIQUE` (`rack_profile_id` ASC))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `aec`.`output_plug_profile`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aec`.`output_plug_profile` (
+  `output_plug_profile_id` INT NOT NULL,
+  `volts` TINYINT(3) NOT NULL,
+  `amps` INT NOT NULL,
+  PRIMARY KEY (`output_plug_profile_id`),
+  UNIQUE INDEX `InputPlugProfile_UNIQUE` (`output_plug_profile_id` ASC))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `aec`.`input_plug_profile`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aec`.`input_plug_profile` (
+  `input_plug_profile_id` INT NOT NULL,
+  `volts` TINYINT(3) NOT NULL,
+  `amps` INT NOT NULL,
+  `frequency` TINYINT(3) NOT NULL,
+  `phase` TINYINT(3) NOT NULL,
+  `cord_length` TINYINT(3) NOT NULL COMMENT 'in inches',
+  PRIMARY KEY (`input_plug_profile_id`),
+  UNIQUE INDEX `InputPlugProfile_UNIQUE` (`input_plug_profile_id` ASC))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `aec`.`pdu_profile`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aec`.`pdu_profile` (
+  `pdu_profile_id` INT NOT NULL,
+  `type` VARCHAR(10) NULL,
+  `style` VARCHAR(10) NULL,
+  `switched` ENUM('Y', 'N') NULL,
+  `input_plug_profile_id` INT NULL,
+  `input_plug_count` TINYINT(2) NULL,
+  `output_plug_profile_id` INT NULL,
+  `output_plug_count` TINYINT(2) NULL,
+  PRIMARY KEY (`pdu_profile_id`),
+  INDEX `fk_OutputPlug_idx` (`output_plug_profile_id` ASC),
+  INDEX `fk_InputPlug_idx` (`input_plug_profile_id` ASC),
+  CONSTRAINT `fk_output_plug`
+    FOREIGN KEY (`output_plug_profile_id`)
+    REFERENCES `aec`.`output_plug_profile` (`output_plug_profile_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_input_plug`
+    FOREIGN KEY (`input_plug_profile_id`)
+    REFERENCES `aec`.`input_plug_profile` (`input_plug_profile_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `aec`.`region`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aec`.`region` (
+  `region_id` INT NOT NULL,
+  `zone_id` VARCHAR(8) NOT NULL,
+  PRIMARY KEY (`zone_id`, `region_id`),
+  CONSTRAINT `fk_region_zone_id`
+    FOREIGN KEY (`zone_id`)
+    REFERENCES `aec`.`zone_instance` (`zone_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
